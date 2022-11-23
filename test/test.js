@@ -1,4 +1,4 @@
-const { authenticate, LdapAuthenticationError } = require('../index.js')
+const { authenticate, AuthenticationOptionError, LdapAuthenticationError } = require('../lib/index.js')
 
 describe('ldap-authentication test', () => {
   it('Use an admin user to check if user exists', async () => {
@@ -18,6 +18,7 @@ describe('ldap-authentication test', () => {
     expect(user).toBeTruthy()
     expect(user.uid).toEqual('gauss')
   })
+
   it('Use an admin user to authenticate a regular user', async () => {
     let options = {
       ldapOpts: {
@@ -35,7 +36,8 @@ describe('ldap-authentication test', () => {
     expect(user).toBeTruthy()
     expect(user.uid).toEqual('gauss')
   })
-  it('Use an admin user to authenticate a regular user and return attrubutes', async () => {
+
+  it('Use an admin user to authenticate a regular user and return attributes', async () => {
     let options = {
       ldapOpts: {
         url: 'ldap://localhost:1389',
@@ -55,6 +57,7 @@ describe('ldap-authentication test', () => {
     expect(user.sn).toEqual('Bar1')
     expect(user.cn).toBeUndefined()
   })
+
   it('Use an regular user to authenticate iteself', async () => {
     let options = {
       ldapOpts: {
@@ -71,6 +74,7 @@ describe('ldap-authentication test', () => {
     expect(user).toBeTruthy()
     expect(user.uid).toEqual('einstein')
   })
+
   it('Use an regular user to authenticate iteself and return attributes', async () => {
     let options = {
       ldapOpts: {
@@ -90,6 +94,7 @@ describe('ldap-authentication test', () => {
     expect(user.sn).toEqual('Bar2')
     expect(user.cn).toBeUndefined()
   })
+
   it('Use an regular user to authenticate iteself without search', async () => {
     let options = {
       ldapOpts: {
@@ -102,6 +107,7 @@ describe('ldap-authentication test', () => {
     let user = await authenticate(options)
     expect(user).toBeTruthy()
   })
+
   it('Use an admin user to authenticate a regular user and fetch user group information', async () => {
     let options = {
       ldapOpts: {
@@ -123,6 +129,7 @@ describe('ldap-authentication test', () => {
     expect(user).toBeTruthy()
     expect(user.groups.length).toBeGreaterThan(0)
   })
+
   it('Use regular user to authenticate and fetch user group information', async () => {
     let options = {
       ldapOpts: {
@@ -143,6 +150,7 @@ describe('ldap-authentication test', () => {
     expect(user).toBeTruthy()
     expect(user.groups.length).toBeGreaterThan(0)
   })
+
   it('Not specifying groupMemberAttribute or groupMemberUserAttribute should not cause an error and fallback to default values', async () => {
     let options = {
       ldapOpts: {
@@ -186,6 +194,7 @@ describe('ldap-authentication negative test', () => {
 
     expect(e).toBeTruthy()
   })
+
   it('wrong admin password should fail', async () => {
     let options = {
       ldapOpts: {
@@ -208,6 +217,7 @@ describe('ldap-authentication negative test', () => {
 
     expect(e).toBeTruthy()
   })
+
   it('admin auth wrong username should fail', async () => {
     let options = {
       ldapOpts: {
@@ -230,6 +240,7 @@ describe('ldap-authentication negative test', () => {
 
     expect(e).toBeTruthy()
   })
+
   it('admin auth wrong user password should fail', async () => {
     let options = {
       ldapOpts: {
@@ -252,6 +263,7 @@ describe('ldap-authentication negative test', () => {
 
     expect(e).toBeTruthy()
   })
+
   it('user auth wrong username should fail', async () => {
     let options = {
       ldapOpts: {
@@ -273,6 +285,7 @@ describe('ldap-authentication negative test', () => {
 
     expect(e).toBeTruthy()
   })
+
   it('user auth wrong user password should fail', async () => {
     let options = {
       ldapOpts: {
@@ -294,6 +307,7 @@ describe('ldap-authentication negative test', () => {
 
     expect(e).toBeTruthy()
   })
+
   it('Use an regular user to authenticate iteself without search with wrong password should fail', async () => {
     let options = {
       ldapOpts: {
@@ -311,6 +325,7 @@ describe('ldap-authentication negative test', () => {
 
     expect(e).toBeTruthy()
   })
+
   it('Wrong options give LdapAuthenticationError', async () => {
     let options = {
       ldapOpts: {
@@ -332,6 +347,24 @@ describe('ldap-authentication negative test', () => {
     expect(e).toBeTruthy()
     expect(e).toBeInstanceOf(LdapAuthenticationError)
   })
+
+  it('Wrong options give AuthenticationOptionError', async () => {
+    let options = {
+      ldapOpts: {
+        url: 'ldap://localhost:1389',
+      }
+    }
+
+    try {
+      await authenticate(options)
+    } catch (error) {
+      e = error
+    }
+
+    expect(e).toBeTruthy()
+    expect(e).toBeInstanceOf(AuthenticationOptionError)
+  })
+
   it('Unreachable ldap server should throw error', async () => {
     let options = {
       ldapOpts: {
@@ -353,6 +386,7 @@ describe('ldap-authentication negative test', () => {
 
     expect(e).toBeTruthy()
   })
+
   it('Unreachable ldap server should throw error (with starttls=true)', async () => {
     let options = {
       ldapOpts: {
@@ -375,6 +409,7 @@ describe('ldap-authentication negative test', () => {
 
     expect(e).toBeTruthy()
   })
+
   it('Unmatched supplied groupMemberUserAttribute should return empty group list', async () => {
     let options = {
       ldapOpts: {
