@@ -58,16 +58,16 @@ export interface AuthenticatedUser {
 }
 
 export class AuthenticationResult {
-    code: number
-    identity: string
-    messages: Array<string>
-    client: LDAPClient
-    user?: AuthenticatedUser
+    public readonly code: number
+    public readonly identity: string
+    public readonly messages: Array<string>
+    public readonly client: LDAPClient
+    public readonly user?: AuthenticatedUser
 
     constructor(
         code: number,
         identity: string,
-        messages: Array<string>,
+        messages: string[],
         client: LDAPClient,
         user?: AuthenticatedUser
     ) {
