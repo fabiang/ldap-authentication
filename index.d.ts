@@ -17,6 +17,7 @@ declare module 'ldap-authentication' {
     groupMemberUserAttribute?: string
     userPassword?: string
     attributes?: string[]
+    explicitBufferAttributes?: string[]
   }
 
   export function authenticate(options: AuthenticationOptions): Promise<any>

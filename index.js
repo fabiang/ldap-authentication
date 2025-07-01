@@ -60,7 +60,8 @@ async function _searchUser(
   searchBase,
   usernameAttribute,
   username,
-  attributes = null
+  attributes = null,
+  explicitBufferAttributes = null
 ) {
   let filter = new ldapts.EqualityFilter({
     attribute: usernameAttribute,
@@ -73,6 +74,9 @@ async function _searchUser(
   }
   if (attributes) {
     searchOptions.attributes = attributes
+  }
+  if(explicitBufferAttributes) {
+    searchOptions.explicitBufferAttributes = explicitBufferAttributes
   }
 
   // TODO: we don't support reference yet
@@ -102,6 +106,14 @@ async function _searchUser(
   if (user != null && attributes != null) {
     for (let attr of attributes) {
       if (attr.endsWith(';binary') && Buffer.isBuffer(user[attr])) {
+        user[attr] = user[attr].toString('base64')
+      }
+    }
+  }
+  // when attribute is one of the explicitBufferAttributes, should convert to base64 string
+  if (user != null && explicitBufferAttributes != null) {
+    for (let attr of explicitBufferAttributes) {
+      if (Buffer.isBuffer(user[attr])) {
         user[attr] = user[attr].toString('base64')
       }
     }
@@ -170,7 +182,8 @@ async function authenticateWithAdmin(
   groupClass,
   groupMemberAttribute = 'member',
   groupMemberUserAttribute = 'dn',
-  attributes = null
+  attributes = null,
+  explicitBufferAttributes = null
 ) {
   let ldapAdminClient
   try {
@@ -191,7 +204,8 @@ async function authenticateWithAdmin(
     userSearchBase,
     usernameAttribute,
     username,
-    attributes
+    attributes,
+    explicitBufferAttributes
   )
   if (!user || !user.dn) {
     ldapOpts.log &&
@@ -241,7 +255,8 @@ async function authenticateWithUser(
   groupClass,
   groupMemberAttribute = 'member',
   groupMemberUserAttribute = 'dn',
-  attributes = null
+  attributes = null,
+  explicitBufferAttributes = null
 ) {
   let ldapUserClient
   try {
@@ -262,7 +277,8 @@ async function authenticateWithUser(
     userSearchBase,
     usernameAttribute,
     username,
-    attributes
+    attributes,
+    explicitBufferAttributes
   )
   if (!user || !user.dn) {
     ldapOpts.log &&
@@ -301,7 +317,8 @@ async function verifyUserExists(
   groupClass,
   groupMemberAttribute = 'member',
   groupMemberUserAttribute = 'dn',
-  attributes = null
+  attributes = null,
+  explicitBufferAttributes = null
 ) {
   let ldapAdminClient
   try {
@@ -322,7 +339,8 @@ async function verifyUserExists(
     userSearchBase,
     usernameAttribute,
     username,
-    attributes
+    attributes,
+    explicitBufferAttributes
   )
   if (!user || !user.dn) {
     ldapOpts.log &&
@@ -384,7 +402,8 @@ async function authenticate(options) {
       options.groupClass,
       options.groupMemberAttribute,
       options.groupMemberUserAttribute,
-      options.attributes
+      options.attributes,
+      options.explicitBufferAttributes
     )
   }
   assert(options.userPassword, 'userPassword must be provided')
@@ -406,7 +425,8 @@ async function authenticate(options) {
       options.groupClass,
       options.groupMemberAttribute,
       options.groupMemberUserAttribute,
-      options.attributes
+      options.attributes,
+      options.explicitBufferAttributes
     )
   }
   assert(options.userDn, 'adminDn/adminPassword OR userDn must be provided')
@@ -422,7 +442,8 @@ async function authenticate(options) {
     options.groupClass,
     options.groupMemberAttribute,
     options.groupMemberUserAttribute,
-    options.attributes
+    options.attributes,
+    options.explicitBufferAttributes
   )
 }
 
